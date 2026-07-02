@@ -2,59 +2,76 @@
 
 {% block title %}Spendly — Track Every Rupee{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/landing.css') }}">
+{% endblock %}
+
 {% block content %}
 
 <section class="hero">
-    <div class="hero-inner">
-        <div class="hero-badge">Personal Finance Tracker</div>
+    <div class="hero-text">
+        <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            Free to use · No credit card needed
+        </div>
         <h1 class="hero-title">
-            Know where your<br>
-            <em>money goes</em>
+            Track every rupee.<br>
+            <span class="hero-title-green">Know where it goes.</span>
         </h1>
         <p class="hero-subtitle">
-            Log expenses, understand your spending patterns,
-            and take control of your financial life —
-            one transaction at a time.
+            Spendly helps you log expenses, spot patterns, and stay<br>
+            on budget — without the spreadsheet headache.
         </p>
         <div class="hero-actions">
-            <a href="{{ url_for('register') }}" class="btn-primary">Start tracking free</a>
-            <a href="{{ url_for('login') }}" class="btn-ghost">Sign in</a>
+            <a href="{{ url_for('register') }}" class="hero-btn">Create free account</a>
+            <a href="#" class="hero-btn" id="see-how-btn">See how it works</a>
         </div>
     </div>
-    <div class="hero-visual">
-        <div class="mock-card">
-            <div class="mock-card-header">
-                <span class="mock-label">March 2026</span>
-                <span class="mock-total">₹12,450</span>
+
+    <div class="hero-mockup">
+        <div class="mockup-browser">
+            <div class="mockup-titlebar">
+                <span class="mockup-dot mockup-dot-red"></span>
+                <span class="mockup-dot mockup-dot-yellow"></span>
+                <span class="mockup-dot mockup-dot-green"></span>
             </div>
-            <div class="mock-bars">
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Bills</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar" style="width: 72%"></div>
+            <div class="mockup-body">
+                <div class="mockup-stats">
+                    <div class="mockup-stat-card">
+                        <span class="mockup-stat-label">This month</span>
+                        <span class="mockup-stat-value">₹18,240</span>
+                        <span class="mockup-stat-note mockup-note-red">+12% vs last</span>
                     </div>
-                    <span class="mock-amt">₹4,500</span>
+                    <div class="mockup-stat-card">
+                        <span class="mockup-stat-label">Budget left</span>
+                        <span class="mockup-stat-value">₹6,760</span>
+                        <span class="mockup-stat-note mockup-note-green">43% remaining</span>
+                    </div>
+                    <div class="mockup-stat-card">
+                        <span class="mockup-stat-label">Transactions</span>
+                        <span class="mockup-stat-value">34</span>
+                        <span class="mockup-stat-note mockup-note-muted">this month</span>
+                    </div>
                 </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Food</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-2" style="width: 52%"></div>
+                <div class="mockup-bars">
+                    <div class="mockup-bar-row">
+                        <span class="mockup-bar-label">Food</span>
+                        <div class="mockup-bar-track">
+                            <div class="mockup-bar-fill mockup-bar-orange" style="width: 75%"></div>
+                        </div>
                     </div>
-                    <span class="mock-amt">₹3,200</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Health</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-3" style="width: 33%"></div>
+                    <div class="mockup-bar-row">
+                        <span class="mockup-bar-label">Travel</span>
+                        <div class="mockup-bar-track">
+                            <div class="mockup-bar-fill mockup-bar-blue" style="width: 56%"></div>
+                        </div>
                     </div>
-                    <span class="mock-amt">₹2,050</span>
-                </div>
-                <div class="mock-bar-row">
-                    <span class="mock-cat">Transport</span>
-                    <div class="mock-bar-track">
-                        <div class="mock-bar mock-bar-4" style="width: 28%"></div>
+                    <div class="mockup-bar-row">
+                        <span class="mockup-bar-label">Bills</span>
+                        <div class="mockup-bar-track">
+                            <div class="mockup-bar-fill mockup-bar-purple" style="width: 45%"></div>
+                        </div>
                     </div>
-                    <span class="mock-amt">₹1,800</span>
                 </div>
             </div>
         </div>
@@ -89,4 +106,50 @@
     </div>
 </section>
 
+<!-- Video modal -->
+<div class="video-modal" id="video-modal">
+    <div class="video-modal-box">
+        <button class="video-modal-close" id="video-modal-close" aria-label="Close video">&times;</button>
+        <iframe
+            id="demo-video"
+            src=""
+            title="Spendly demo"
+            allow="autoplay; encrypted-media"
+            allowfullscreen>
+        </iframe>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const modal     = document.getElementById('video-modal');
+    const iframe    = document.getElementById('demo-video');
+    const openBtn   = document.getElementById('see-how-btn');
+    const closeBtn  = document.getElementById('video-modal-close');
+    const VIDEO_SRC = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0';
+
+    function openModal(e) {
+        e.preventDefault();
+        iframe.src = VIDEO_SRC;
+        modal.classList.add('active');
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        iframe.src = '';
+    }
+
+    openBtn.addEventListener('click', openModal);
+    closeBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal();
+    });
+</script>
 {% endblock %}
