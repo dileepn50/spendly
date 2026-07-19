@@ -62,6 +62,7 @@
                         </tr>
                     </thead>
                     <tbody>
+                        {% if transactions %}
                         {% for tx in transactions %}
                         <tr>
                             <td>{{ tx.date }}</td>
@@ -70,6 +71,11 @@
                             <td class="tx-amount-col">₹{{ "{:,.2f}".format(tx.amount) }}</td>
                         </tr>
                         {% endfor %}
+                        {% else %}
+                        <tr>
+                            <td colspan="4" class="empty-state-cell">No transactions yet — add your first expense to see it here.</td>
+                        </tr>
+                        {% endif %}
                     </tbody>
                 </table>
             </div>
@@ -81,15 +87,19 @@
                 Category Breakdown
             </h2>
             <div class="category-list">
+                {% if categories %}
                 {% for cat in categories %}
                 <div class="category-row">
                     <span class="category-name">{{ cat.name }}</span>
                     <div class="category-bar-track">
-                        <div class="category-bar-fill cat-bar-{{ cat.name|lower }}"></div>
+                        <div class="category-bar-fill cat-bar-{{ cat.name|lower }}" style="width: {{ cat.percent }}%"></div>
                     </div>
                     <span class="category-amount">₹{{ "{:,.2f}".format(cat.amount) }}</span>
                 </div>
                 {% endfor %}
+                {% else %}
+                <p class="empty-state-text">No expenses yet. Once you add some, your category breakdown will show up here.</p>
+                {% endif %}
             </div>
         </div>
 

@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -158,37 +159,101 @@ def profile():
     if not session.get("user_id"):
         return redirect(url_for("login"))
 
-    display_name = session.get("user_name", "Demo User")
-    parts = display_name.split()
-    initials = (parts[0][0] + parts[1][0]).upper() if len(parts) >= 2 else display_name[:2].upper()
+    user_id = session["user_id"]
 
-    user = {
-        "name": display_name,
-        "initials": initials,
-        "email": "demo@spendly.com",
-        "member_since": "March 2025",
-    }
+    conn = get_db()
+    try:
+        user_row = conn.execute(
+            "SELECT name, email, created_at FROM users WHERE id = ?", (user_id,)
+        ).fetchone()
 
-    stats = {
-        "total_spent": 18240.00,
-        "transaction_count": 34,
-        "top_category": "Food",
-    }
+        display_name = user_row["name"]
+        parts = display_name.split()
+        initials = (parts[0][0] + parts[1][0]).upper() if len(parts) >= 2 else display_name[:2].upper()
+        member_since_dt = datetime.strptime(user_row["created_at"], "%Y-%m-%d %H:%M:%S")
 
-    transactions = [
-        {"date": "Jul 10, 2026", "description": "Groceries at Trader Joe's", "category": "Food", "amount": 1432.00},
-        {"date": "Jul 8, 2026", "description": "Uber ride to airport", "category": "Transport", "amount": 845.00},
-        {"date": "Jul 5, 2026", "description": "Electricity bill", "category": "Bills", "amount": 2150.00},
-        {"date": "Jul 3, 2026", "description": "Movie tickets", "category": "Entertainment", "amount": 960.00},
-        {"date": "Jul 1, 2026", "description": "Dinner at Cafe Mocha", "category": "Food", "amount": 620.00},
-    ]
+        user = {
+            "name": display_name,
+            "initials": initials,
+            "email": user_row["email"],
+            "member_since": member_since_dt.strftime("%B %Y"),
+        }
 
-    categories = [
-        {"name": "Food", "amount": 6930.00, "percent": 38},
-        {"name": "Bills", "amount": 5472.00, "percent": 30},
-        {"name": "Transport", "amount": 3284.00, "percent": 18},
-        {"name": "Entertainment", "amount": 2554.00, "percent": 14},
-    ]
+        # === SECTION: SUMMARY STATS (Subagent 2 — edit ONLY between these markers) ===
+        totals_row = conn.execute(
+            """
+            SELECT COALESCE(SUM(amount), 0) AS total_spent, COUNT(*) AS transaction_count
+            FROM expenses WHERE user_id = ?
+            """,
+            (user_id,),
+        ).fetchone()
+
+        top_category_row = conn.execute(
+            """
+            SELECT category, SUM(amount) AS category_total
+            FROM expenses WHERE user_id = ?
+            GROUP BY category
+            ORDER BY category_total DESC
+            LIMIT 1
+            """,
+            (user_id,),
+        ).fetchone()
+
+        stats = {
+            "total_spent": totals_row["total_spent"],
+            "transaction_count": totals_row["transaction_count"],
+            "top_category": top_category_row["category"] if top_category_row else "—",
+        }
+        # === END SECTION: SUMMARY STATS ===
+
+        # === SECTION: TRANSACTION HISTORY (Subagent 1 — edit ONLY between these markers) ===
+        tx_rows = conn.execute(
+            """
+            SELECT date, description, category, amount
+            FROM expenses
+            WHERE user_id = ?
+            ORDER BY date DESC, created_at DESC
+            LIMIT 5
+            """,
+            (user_id,),
+        ).fetchall()
+
+        transactions = [
+            {
+                "date": datetime.strptime(row["date"], "%Y-%m-%d").strftime("%b %-d, %Y"),
+                "description": row["description"] or "",
+                "category": row["category"],
+                "amount": row["amount"],
+            }
+            for row in tx_rows
+        ]
+        # === END SECTION: TRANSACTION HISTORY ===
+
+        # === SECTION: CATEGORY BREAKDOWN (Subagent 3 — edit ONLY between these markers) ===
+        category_rows = conn.execute(
+            """
+            SELECT category, SUM(amount) AS amount
+            FROM expenses
+            WHERE user_id = ?
+            GROUP BY category
+            ORDER BY amount DESC
+            """,
+            (user_id,),
+        ).fetchall()
+
+        category_total = sum(row["amount"] for row in category_rows)
+
+        categories = [
+            {
+                "name": row["category"],
+                "amount": row["amount"],
+                "percent": round(row["amount"] / category_total * 100) if category_total > 0 else 0,
+            }
+            for row in category_rows
+        ]
+        # === END SECTION: CATEGORY BREAKDOWN ===
+    finally:
+        conn.close()
 
     return render_template(
         "profile.html",
