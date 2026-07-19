@@ -190,6 +190,9 @@
 .badge-bills          { background: var(--accent-light);   color: var(--accent); }
 .badge-transport      { background: var(--accent-3-light); color: var(--accent-3); }
 .badge-entertainment  { background: var(--accent-4-light); color: var(--accent-4); }
+.badge-health         { background: var(--accent-2-light); color: var(--accent-2); }
+.badge-shopping       { background: var(--accent-light);   color: var(--accent); }
+.badge-other          { background: var(--accent-3-light); color: var(--accent-3); }
 
 /* ------------------------------------------------------------------ */
 /* Category breakdown                                                  */
@@ -227,10 +230,13 @@
     transition: width 0.6s ease;
 }
 
-.cat-bar-food          { width: 38%; background: var(--accent-2); }
-.cat-bar-bills          { width: 30%; background: var(--accent); }
-.cat-bar-transport      { width: 18%; background: var(--accent-3); }
-.cat-bar-entertainment  { width: 14%; background: var(--accent-4); }
+.cat-bar-food          { background: var(--accent-2); }
+.cat-bar-bills          { background: var(--accent); }
+.cat-bar-transport      { background: var(--accent-3); }
+.cat-bar-entertainment  { background: var(--accent-4); }
+.cat-bar-health         { background: var(--accent-2); }
+.cat-bar-shopping       { background: var(--accent); }
+.cat-bar-other          { background: var(--accent-3); }
 
 .category-amount {
     font-size: 0.9rem;
@@ -249,6 +255,14 @@
 /* ------------------------------------------------------------------ */
 /* Responsive                                                          */
 /* ------------------------------------------------------------------ */
+
+.empty-state-cell,
+.empty-state-text {
+    text-align: center;
+    color: var(--ink-faint);
+    padding: 1.5rem 0;
+    font-size: 0.9rem;
+}
 
 @media (max-width: 900px) {
     .profile-stats-row { grid-template-columns: 1fr; }
